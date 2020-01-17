@@ -1,11 +1,6 @@
+import os
+
 # MT = (Q = skonczony zbior stanow, Σ = zbior symboli wejsciowych, δ = funkcja przejscia, Γ = alfabet, q0 = stan wejsciowy, B = symbol pusty, F = zbior stanow koncowych) # noqa
-
-
-class State():
-    def __init__(self, temp, i, Γ):
-        self.name = temp[i+2][0]
-        # self.type  # entry, standard, end
-        self.transitions = [temp[i+2][1+4*j:5+4*j] for j in range(len(Γ))]
 
 
 class Turing():
@@ -13,14 +8,14 @@ class Turing():
         temp = Turing.open_automaton(auto_name)
         self.signs = temp[0]  # list of signs
         self.empty = temp[0][0]  # char of the empty sign
-        self.states = [temp[i][0] for i in range(2, len(temp))]  # list of states
         self.entry = temp[1][0]  # char of the first state
         self.end = temp[1][1:]  # list of the end states
         self.now_state = self.entry
-        self.moves = [State(temp, i, self.signs) for i in range(len(self.states)) if temp[i+2][0] not in self.end]
+        self.states = [temp[i][0] for i in range(2, len(temp)) if temp[i][0] not in self.end]  # list of states
+        self.moves = [[temp[i+2][1+4*j:5+4*j] for j in range(len(self.signs))] for i in range(len(self.states)) if temp[i+2][0] not in self.end]
         temp = Turing.open_tape(tape_name)
         self.tape = [temp[0][i] for i in range(len(temp[0]))]
-        self.now_tape = 0
+        self.now_tape = 1
 
     @staticmethod
     def open_automaton(file_name):
@@ -42,20 +37,23 @@ class Turing():
 
     def main(self):
         while Turing.move(self):
-            pass
+            os.system('clear')
+            print('\n\n      '+' '.join(sims.tape))
+            print('\n'+' '*(6+2*self.now_tape)+'^')
+            input()
 
     def move(self):
-        for i in range(len(self.moves)):
-            if self.moves[i].name == self.now_state:
-                current = i
-                break
         if self.now_state in self.end:
             return False
-        for i in range(len(self.moves[current].transitions)):
-            if self.moves[current].transitions[i][0] == str(self.tape[self.now_tape]):
-                self.tape[self.now_tape] = self.moves[current].transitions[i][1]
-                self.now_state = self.moves[current].transitions[i][2]
-                temp = self.moves[current].transitions[i][3]
+        for i in range(len(self.moves)):
+            if self.states[i] == self.now_state:
+                current = i
+                break
+        for i in range(len(self.moves[current])):
+            if self.moves[current][i][0] == str(self.tape[self.now_tape]):
+                self.tape[self.now_tape] = self.moves[current][i][1]
+                self.now_state = self.moves[current][i][2]
+                temp = self.moves[current][i][3]
                 if temp == 'L':
                     self.now_tape -= 1
                 elif temp == 'P':
@@ -66,4 +64,3 @@ class Turing():
 if __name__ == "__main__":
     sims = Turing()
     sims.main()
-    print(' '.join(sims.tape))
