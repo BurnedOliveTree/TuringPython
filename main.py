@@ -26,7 +26,7 @@ class Turing():
     @staticmethod
     def open_tape(file_name):
         with open(file_name, 'r') as file:
-            tape = [line for line in file]
+            tape = [line.rstrip() for line in file]
         return tape
 
     @staticmethod
@@ -34,13 +34,6 @@ class Turing():
         for i in range(len(entry)):
             string = string.replace(entry[i], end)
         return string
-
-    def main(self):
-        while Turing.move(self):
-            os.system('clear')
-            print('\n\n      '+' '.join(sims.tape))
-            print('\n'+' '*(6+2*self.now_tape)+'^')
-            input()
 
     def move(self):
         if self.now_state in self.end:
@@ -58,7 +51,20 @@ class Turing():
                     self.now_tape -= 1
                 elif temp == 'P':
                     self.now_tape += 1
+                break
         return True
+
+    def main(self):
+        self.__str__()
+        input()
+        while self.move():
+            self.__str__()
+            input()
+
+    def __str__(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print('\n\n      '+' '.join(self.tape))
+        print('\n'+' '*(6+2*self.now_tape)+'^')
 
 
 if __name__ == "__main__":
